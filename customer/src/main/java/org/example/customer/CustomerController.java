@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 public record CustomerController(CustomerService customerService) {
 
     @PostMapping
-    public void registerCustomer(@RequestBody CustomerRegistrationRequest customerRequest){
+    public void registerCustomer(@RequestBody CustomerRegistrationRequest customerRequest) throws IllegalAccessException {
         log.info("new customer : {}", customerRequest);
         customerService.registerCustomer(customerRequest);
     }
