@@ -1,15 +1,21 @@
-package org.example.customer;
+package com.example.customer;
 
 import com.example.amqp.RabbitMQMessageProducer;
 import com.example.clients.fraud.FraudCheckResponse;
 import com.example.clients.fraud.FraudClient;
 import com.example.clients.notifications.NotificationRequest;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+@AllArgsConstructor
 @Service
-public record CustomerService(CustomerRepository customerRepository, FraudClient fraudClient, RabbitMQMessageProducer producer) {
+public class CustomerService {
 
-    public void registerCustomer(CustomerRegistrationRequest request) throws IllegalAccessException {
+    private final CustomerRepository customerRepository;
+    private final FraudClient fraudClient;
+    private final RabbitMQMessageProducer producer;
+
+    public void registerCustomer(CustomerRegistrationRequest request){
         Customer customer = Customer.builder()
                 .firstName(request.firstName())
                 .lastName(request.lastName())
@@ -19,10 +25,9 @@ public record CustomerService(CustomerRepository customerRepository, FraudClient
 
         FraudCheckResponse fraudCheckResponse = fraudClient.isFraudster(customer.getId());
 
-        if(fraudCheckResponse.isFraudster()) {
-            throw new IllegalAccessException("Fraudster detected");
+        if (fraudCheckResponse.isFraudster()) {
+            throw new IllegalStateException("fraudster");
         }
-
 
         NotificationRequest notificationRequest = new NotificationRequest(
                 customer.getId(),
@@ -30,6 +35,8 @@ public record CustomerService(CustomerRepository customerRepository, FraudClient
                 String.format("Hi %s, welcome to this app.", customer.getFirstName())
         );
 
-        producer.publish(notificationRequest, "internal.exchange", "internal.notification.routing-key");
+        producer.publish(notificationRequest,
+                "internal.exchange",
+                "internal.notification.routing-key");
     }
 }
