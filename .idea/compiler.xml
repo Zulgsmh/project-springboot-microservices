@@ -12,6 +12,7 @@
         <module name="clients" />
         <module name="fraud" />
         <module name="amqp" />
+        <module name="kafka" />
         <module name="eureka-server" />
         <module name="customer" />
       </profile>
